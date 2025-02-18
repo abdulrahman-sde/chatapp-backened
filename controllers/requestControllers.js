@@ -25,7 +25,8 @@ const sendFriendRequest = async (req, res) => {
             sender: senderId,
             receiver: receiverId
         })
-        if (existingRequest?.status === 'pending') {
+
+        if (existingRequest?.status === 'PENDING') {
             return res.status(409).json({
                 data: null,
                 message: "Friend request already sent"
@@ -37,6 +38,7 @@ const sendFriendRequest = async (req, res) => {
             receiver: receiverId
         })
         await friendRequest.save()
+
         return res.status(200).json({
             message: "Request Sent Successfully"
         })
@@ -76,7 +78,7 @@ const handleFriendRequest = async (req, res) => {
             })
         }
         if (action === "ACCEPT") {
-            friendRequest.status = "accepted"
+            friendRequest.status = "ACCEPTED"
             await friendRequest.save()
 
             await User.findByIdAndUpdate(friendRequest.sender, {
@@ -95,11 +97,11 @@ const handleFriendRequest = async (req, res) => {
                 });
             }
             res.status(200).json({
-                message:"Friend Request Accepted"
+                message:"Friend Request ACCEPTED"
             })
 
         }else if(action==="REJECT"){
-            friendRequest.status="rejected"
+            friendRequest.status="REJECTED"
             await friendRequest.save()
             res.status(200).json(
                 {
@@ -125,7 +127,7 @@ const fetchFriendRequests = async (req, res) => {
     try {
       const friendRequests = await FriendRequest.find({
         receiver: userId,
-        status: "pending",
+        status: "PENDING",
       }).populate("sender", "firstName lastName username profilePic");
   
       return res.status(200).json({

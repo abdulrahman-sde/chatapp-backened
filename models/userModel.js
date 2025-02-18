@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     profilePic: {
         type: String,
-        default: "",
+        default: "https://res.cloudinary.com/deni18m0m/image/upload/v1739211632/Chatapp/akzxqvn2wgmygz9z9joq.png",
     },
     friendsList:[{type:mongoose.Schema.Types.ObjectId, ref:"User"}],
     isOnline: {

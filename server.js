@@ -10,6 +10,7 @@ import { app, server } from './sockets/sockets.js';
 import { authRouter } from './routes/authRoutes.js';
 import userRouter from './routes/userRoutes.js';
 import requestRouter from './routes/requestRoutes.js';
+import chatRouter from './routes/chatRoute.js';
 
 
 // Middlewares
@@ -29,7 +30,7 @@ db_connection()
 app.use('/auth',authRouter)
 app.use('/users',userRouter)
 app.use('/requests',requestRouter)
-
+app.use('/chat',chatRouter)
 
 
 // Server

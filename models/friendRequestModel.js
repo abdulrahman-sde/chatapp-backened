@@ -13,8 +13,8 @@ const friendRequestSchema = new Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "accepted", "rejected"],
-        default: "pending",
+        enum: ["PENDING", "ACCEPTED", "REJECTED"],
+        default: "PENDING",
     },
 },{timestamps:true});
 

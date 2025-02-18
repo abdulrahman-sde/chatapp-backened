@@ -1,17 +1,56 @@
 import User from '../models/userModel.js'
 import FriendRequest from '../models/friendRequestModel.js'
 import Conversation from '../models/conversationModel.js'
-const searchByUserNameOrName = async (req,res) => {
+
+const fetchUserDetails = async (req, res) => {
     try {
-        const {query} = req.params
+        const userId = req.user._id
+        const user = await User.findById(userId)
+        if (!user) {
+            return res.status(404).json({
+                data: null,
+                error: true,
+                message: "Invalid Token"
+            })
+        }
+        res.status(200).json({
+            data: {
+                _id: user._id,
+                username: user.username,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                fullName: user.firstName + " " + user.lastName,
+                email: user.email,
+                profilePic: user.profilePic,
+                friendsList: user.friendsList,
+                isOnline: user.isOnline
+            },
+
+            message: "User logged in successfully",
+        });
+    }
+    catch (err) {
+        res.status(404).json({
+            data: null,
+            error: err,
+            message: "Error fetching user details"
+        })
+    }
+}
+
+
+
+const searchByUserNameOrName = async (req, res) => {
+    try {
+        const { query } = req.params
         const userId = req.user._id
 
 
-        if(!userId){
+        if (!userId) {
             return res.status(400).json({
-                message:"User not authenticated"
+                message: "User not authenticated"
             })
-            
+
         }
 
         const users = await User.find({
@@ -25,18 +64,18 @@ const searchByUserNameOrName = async (req,res) => {
 
         const friendRequests = await FriendRequest.find({
             $or: [{ sender: userId }, { receiver: userId }],
-            status: "pending"
+            status: "PENDING"
         })
 
-        const requestedUserIds = friendRequests.filter((request) => {
-            return request.sender.toString() === userId
-        }).map((request) => {
-            return request.receiver._id.toString()
-        })
-        const receivedUserIds = friendRequests.filter((request) => {
-            return request.receiver.toString() === userId
-        }).map((request) => {
-            return request.sender._id.toString()
+        const requestedUserIds = []
+        const receivedUserIds = []
+
+        friendRequests.forEach((request) => {
+            if (request.sender.toString() === userId) {
+                requestedUserIds.push(request.receiver.toString())
+            } else {
+                receivedUserIds.push(request.sender.toString())
+            }
         })
 
 
@@ -54,57 +93,58 @@ const searchByUserNameOrName = async (req,res) => {
         })
         res.status(200).json({
             data,
-            message:"List of user searched"
+            message: "List of user searched"
         })
     }
     catch (err) {
         res.status(409).json({
-            data:null,
-            message:"Error searching users",
+            data: null,
+            message: "Error searching users",
             err
         })
     }
 }
 
-const fetchFriendsList=async (req,res)=>{
-    const userId=req.user._id
-    try{
-        const user=await User.findById(userId).populate("friendsList","firstName lastName username profilePic isOnline" )
+const fetchFriendsList = async (req, res) => {
+    const userId = req.user._id
+    try {
+        const user = await User.findById(userId).populate("friendsList", "firstName lastName username profilePic isOnline")
 
-        const friendsList= await Promise.all(
-            user.friendsList.map(async (friend)=>{
-                const conversation= await Conversation.findOne({
-                    participants:{$all:[userId,friend._id]}
+        const friendsList = await Promise.all(
+            user.friendsList.map(async (friend) => {
+                const conversation = await Conversation.findOne({
+                    participants: { $all: [userId, friend._id] }
                 }).select("_id")
                 return {
-                    _id:friend._id,
-                    username:friend.userName,
-                    fullName:friend.firstName + " " + friend.lastName,
-                    profilePic:friend.profilePic,
-                    conversation_id:conversation._id,
-                    isOnline:friend.isOnline
-                } 
+                    _id: friend._id,
+                    username: friend.userName,
+                    fullName: friend.firstName + " " + friend.lastName,
+                    profilePic: friend.profilePic,
+                    conversationId: conversation._id,
+                    isOnline: friend.isOnline
+                }
             })
 
-            
+
         )
         res.status(200).json({
-            data:friendsList,
-            message:"Friends list fetched successfully",
+            data: friendsList,
+            message: "Friends list fetched successfully",
         })
 
     }
-    catch(err){
+    catch (err) {
         res.status(409).json({
-            data:null,
-            message:"Error fetching friend list",
-            error:err
+            data: null,
+            message: "Error fetching friend list",
+            error: err
         })
     }
 }
 
 
 export {
+    fetchUserDetails,
     searchByUserNameOrName,
     fetchFriendsList
 }

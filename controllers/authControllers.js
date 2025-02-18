@@ -43,7 +43,6 @@ const registerUser = async (req, res) => {
         newUser.save();
 
         res.status(201).json({
-            data: newUser,
             message: "User created successfully",
         });
 
@@ -94,6 +93,7 @@ const loginUser = async (req, res) => {
                     username: existingUser.username,
                     firstName: existingUser.firstName,
                     lastName: existingUser.lastName,
+                    fullName:existingUser.firstName +" "+existingUser.lastName,
                     email: existingUser.email,
                     profilePic: existingUser.profilePic,
                     friendsList: existingUser.friendsList,

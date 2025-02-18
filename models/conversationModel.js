@@ -9,9 +9,9 @@ const messageSchema = new Schema({
     },
     content: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    is_seen: { type: Boolean, default: false },
+    isSeen: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
-    is_delivered: { type: Boolean, default: false },
+    isDelivered: { type: Boolean, default: false },
     deletedFor: [{ type: Schema.Types.ObjectId, ref: "User" }],
   });
 
