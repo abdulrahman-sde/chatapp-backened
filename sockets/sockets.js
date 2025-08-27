@@ -79,43 +79,7 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Handle typing status
-    socket.on("TYPING", async ({ conversationId, isTyping }) => {
-        try {
-            const userId = socket.user._id;
-            const conversation = await Conversation.findById(conversationId);
-
-            if (!conversation) {
-                socket.emit("ERROR", { message: "Conversation not found" });
-                return;
-            }
-
-            const existingTypingStatus = conversation.isTyping.find(
-                (status) => status.participantId.toString() === userId.toString()
-            );
-
-            if (existingTypingStatus) {
-                existingTypingStatus.is_typing = isTyping;
-            } else {
-                conversation.isTyping.push({
-                    participantId: userId,
-                    is_typing: isTyping,
-                });
-            }
-
-            await conversation.save();
-
-            // Emit typing status to other participants
-            socket.to(conversationId).emit("TYPING_STATUS", {
-                userId,
-                isTyping,
-            });
-        } catch (error) {
-            console.error("Error handling typing status:", error);
-            socket.emit("ERROR", { message: "Failed to update typing status", error: error.message });
-        }
-    });
-
+    
     // Handle user disconnect
     socket.on('disconnect', () => {
         console.log('user disconnected');
